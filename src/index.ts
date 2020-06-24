@@ -41,12 +41,12 @@ client.on("message", async msg => {
     const { content } = msg;
 
     // play command
-    if( withPrefix("play( \\d)?").test(content) ) {
+    if( withPrefix("play( \\d+)?").test(content) ) {
         try{
             const { id } = msg.member.guild;
 
             if( !globalState[id] ) {
-                const match = content.match(/\d/);
+                const match = content.match(/\d+/);
     
                 globalState[id] = {
                     isStarted: false,
@@ -130,7 +130,7 @@ client.on("message", async msg => {
                         } else {
     
                             // if count < 0, leave from voice channel
-                            globalState[id].isStarted = false;
+                            delete globalState[id];
                             voice.leave();
                         }
                     }, 3000 );
