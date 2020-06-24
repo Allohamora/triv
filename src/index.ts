@@ -130,6 +130,7 @@ client.on("message", async msg => {
                         } else {
     
                             // if count < 0, leave from voice channel
+                            globalState[id].isStarted = false;
                             voice.leave();
                         }
                     }, 3000 );
