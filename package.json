@@ -1,0 +1,25 @@
+{
+  "name": "bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node ./src/index.ts",
+    "dev": "ts-node-dev ./src/index.ts"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.3.2",
+    "@types/mongoose": "^5.7.27",
+    "@types/puppeteer": "^3.0.0",
+    "discord.js": "^12.2.0",
+    "dotenv": "^8.2.0",
+    "ffmpeg-static": "^4.2.4",
+    "mongoose": "^5.9.20",
+    "puppeteer": "^4.0.0",
+    "ts-node": "^8.10.2",
+    "ts-node-dev": "^1.0.0-pre.49",
+    "typescript": "^3.9.5"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.13"
+  }
+}
