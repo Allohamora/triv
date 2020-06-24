@@ -8,7 +8,7 @@ import { parseAppleMusic } from "./parseAppleMusic";
 // .env config
 dotenv.config();
 // data from config
-const { TOKEN, PREFIX, MONGO_URI, LIST } = process.env;
+const { TOKEN, PREFIX, MONGO_URI } = process.env;
 
 interface GlobalState {
     [id: string]: {
@@ -27,7 +27,7 @@ const preparation = async() => await mongoose.connect(MONGO_URI, {
 });
 
 // list of emoji
-const emoji = LIST.split("");
+const emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"];
 
 // loading from apple music to db
 let isLoading: boolean = false;
