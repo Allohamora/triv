@@ -109,7 +109,7 @@ client.on("message", async msg => {
     
                     // edit embed
                     embed.setTitle(song.full);
-                    embed.setDescription(arr.join("\n"));
+                    embed.setDescription(rightEmoji + "\t\t" + song.title + "\n\n" + arr.join(""));
                     embed.setURL(song.link);
                     message.edit(embed);
     
