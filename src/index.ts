@@ -2,7 +2,7 @@ import * as Discord from "discord.js";
 import * as dotenv from "dotenv";
 import * as mongoose from "mongoose";
 import { getByLink } from "./getByLink";
-import { Song, iSong } from "./models/song";
+import { Song, iSong, SongDocument, getQuize } from "./models/song";
 import { parseAppleMusic } from "./parseAppleMusic";
  
 dotenv.config();
@@ -21,6 +21,7 @@ const preparation = async() => await mongoose.connect(MONGO_URI, {
     useUnifiedTopology: true
 });
 
+const emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"];
 let isLoading: boolean = false;
 
 const withPrefix = (pattern: string, flags?: string) => new RegExp( "^" + PREFIX + pattern, flags); 
@@ -31,13 +32,47 @@ client.on("message", async msg => {
     // play command
     if( withPrefix("play").test(content) ) {
         const voice =  msg.member.voice.channel;
-        const song = await Song.findOne().skip(25).exec();
+        const { id } = msg.member.guild;
+
+        if( globalState[id] ) return msg.reply("game already started!");
+
+        const quize = await getQuize();
+
+        const random = Math.floor( Math.random() * 4 );
+        const song = quize[random];
         const stream = await getByLink(song.src);
         const joined = await voice.join();
 
+        const embed = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(song.author)
+        .setFooter("powered by apple music!")
+        .setDescription(quize.map( ({title}, index) => emoji[index] + "\t\t" + title ).join("\n \n"))
+        .setTimestamp()
+
+        const message = await msg.channel.send(embed);
+        const rightEmoji = emoji[random];
+        emoji.forEach( emo => {
+            message.react(emo);
+        } );
+
+        const reactions = message.awaitReactions(() => true, { time: 28000 });
+
         stream.on("end", () => {
             voice.leave();
+            reactions.then( collected => {
+                const arr = [...collected.get(rightEmoji).users.cache].map( ([id, user]) => {
+                    if( id === client.user.id ) return "";
+                    return `<@${id}>`
+                });
+
+                embed.setTitle(song.full);
+                embed.setDescription(arr.join("\n"));
+                embed.setURL(song.link);
+                message.edit(embed);
+            });
         });
+
         stream.on("error", () => {
             voice.leave();
         })

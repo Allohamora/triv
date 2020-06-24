@@ -25,3 +25,35 @@ const songSchema = new Schema<iSong>({
 });
 
 export const Song = mongoose.model<SongDocument>("songs", songSchema);
+
+const getAuthor = async () => {
+    const count = await Song.countDocuments().exec();
+    const rand = Math.floor(Math.random() * count);
+    return (await Song.findOne().skip(rand).exec()).author;
+};
+
+export const getQuize = async () => {
+    const author = await getAuthor();
+    const quizes = await Song.find({ author }).exec();
+
+    const indexes = [];
+
+    if( quizes.length < 4 ) {
+        const count = await Song.countDocuments().exec();
+        return [
+            await Song.findOne().skip( Math.floor(Math.random() * count) ).exec(),
+            await Song.findOne().skip( Math.floor(Math.random() * count) ).exec(),
+            await Song.findOne().skip( Math.floor(Math.random() * count) ).exec(),
+            await Song.findOne().skip( Math.floor(Math.random() * count) ).exec()
+        ]
+    } else {
+        while( indexes.length !== 4 ) {
+            const rand = Math.floor(Math.random() * quizes.length);
+
+            if( indexes.includes(rand) ) continue;
+            indexes.push(rand);
+        }
+    }
+
+    return indexes.map( index => quizes[index] );
+}
