@@ -91,13 +91,13 @@ client.on("message", async msg => {
         // get quize
         const quize = await getQuize();
 
-        //get random number for right quize
+        // get random number for right quize
         const random = Math.floor( Math.random() * 4 );
 
-        // select quize
+        // select right quize
         const song = quize[random];
 
-        //get read stream from url
+        // get read stream from url
         const stream = await getByLink(song.src);
 
         // get voice channel, and voice connection
@@ -133,6 +133,8 @@ client.on("message", async msg => {
             if( state.count ) {
                 // reset started
                 state.isStarted = false;
+
+                // reset skiped
                 state.isSkiped = false;
                 
                 // send play command
@@ -142,7 +144,7 @@ client.on("message", async msg => {
                 await msg.delete();
             } else {
 
-                // if count < 0, leave from voice channel
+                // if count < 0, delete state, and leave from voice channel
                 delete globalState[id];
                 voice.leave();
             }
@@ -225,6 +227,8 @@ client.on("message", async msg => {
     
         // create result from parse data
         const result = links.map( ({ src, title: full }) => {
+
+            // full have "title - author - album" type
             const splited = full.split(" - ");
         
             const [title, author] = splited;
@@ -252,6 +256,7 @@ client.on("message", async msg => {
 client.on("message", async msg => {
     const { content } = msg;
 
+    // if not skip command
     if( !new RegExp(commands.skip).test(content) ) return;
 
     try {
@@ -271,8 +276,9 @@ client.on("message", async msg => {
 
 // stop command
 client.on("message", async msg => {
-    
     const { content } = msg;
+
+    // if not stop command
     if( !new RegExp(commands.stop).test(content) ) return;
 
     try {
