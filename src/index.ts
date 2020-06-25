@@ -44,10 +44,11 @@ const commands = {
 let isLoading: boolean = false;
 
 // music error handler
-const errorHandler = (msg: Discord.Message) => {
+const errorHandler = (msg: Discord.Message, e: Error) => {
     const { id } = msg.member.guild;
 
     msg.reply("error with bot!");
+    console.error(e);
 
     if( globalState[id] ) {
         globalState[id].voice.leave();
@@ -191,7 +192,7 @@ client.on("message", async msg => {
             })
 
     } catch(e) {
-        errorHandler(msg)
+        errorHandler(msg, e)
     }
 });
 
@@ -200,20 +201,22 @@ client.on("message", async msg => {
     const { content } = msg;
 
     // if not add album command
-    if( !new RegExp(`${commands.add} https://music.apple.com/ru/album.+?`).test(content) ) return;
+    if( !new RegExp(`${commands.add} https://music.apple.com/.+?/album.+?`).test(content) ) return;
 
     try {
         //regexp for right link
-        const regexp = /https:\/\/music.apple.com\/ru\/album\/.+/;
+        const regexp = /https:\/\/music.apple.com\/.+?\/album\/(.+)/;
 
         // if not right
         if( !regexp.test(content) ) return msg.reply("incorrect url!");
 
+        const match = content.match(regexp);
+
         // delete selected song id
-        const link = content.match(regexp)[0].replace(/\?i=.*/, "");
+        const link = match[0].replace(/\?i=.*/, "");
 
         // if already in db
-        const inDB = await Song.findOne({ link });
+        const inDB = await Song.findOne({ link: { $regex: new RegExp(`https:\/\/music.apple.com\/.+?\/album\/${match[1]}`) } });
 
         // if bot loading album to db
         if( isLoading ) return msg.reply("please wait!");
@@ -249,6 +252,7 @@ client.on("message", async msg => {
         isLoading = false;
     } catch(e) {
         msg.reply("error with adding to db!");
+        console.error(e);
     }
 });
 
@@ -270,7 +274,7 @@ client.on("message", async msg => {
         // invoke finish event
         globalState[id].stream?.end();
     } catch (e) {
-        errorHandler(msg);
+        errorHandler(msg, e);
     }
 });
 
@@ -293,7 +297,7 @@ client.on("message", async msg => {
         const message = await msg.channel.send(commands.skip);
         await message.delete();
     } catch (e) {
-        errorHandler(msg);
+        errorHandler(msg, e);
     }
 });
 
